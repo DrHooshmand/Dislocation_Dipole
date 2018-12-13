@@ -1,0 +1,51 @@
+#Straining
+
+units                  metal
+atom_style              atomic
+
+boundary              p p p
+box tilt large
+read_data             ready_to_tilt
+mass 1 24.305
+
+#pair_style  eam/alloy
+#pair_coeff * *   MgAl.eam.alloy Mg 
+
+#fix 1 all box/relax z 0
+thermo_style custom step xlo xhi
+variable        xl equal    xlo
+variable        xh equal    xhi
+variable        yl equal    ylo
+variable        yh equal    yhi
+variable        zl equal    zlo
+variable        zh equal    zhi
+
+variable        xy equal    xy
+variable        xz equal    xz
+variable        yz equal    yz
+
+
+variable        LX equal 3*lx
+variable        LZ equal lz/2
+
+#region          box1 prism -${xdim} ${xdim} -${ydim} ${ydim} -${zdim} ${zdim} -${tiltxy} 0.0 0.0
+
+#region          box1 prism ${xl} ${xh} ${yl} ${yh} ${zl} ${zh} 0.0 0.0 ${LZ}
+
+#create_box  1 box1
+#create_atoms 1 box
+
+#fix 1 all deform 1 x final 0 ${LX} remap
+#fix 1 all deform 1 x final 2 9.0 z final 2 5.0 units box
+#change_box all remap xy delta ${LX} remap units box
+#change_box all xy delta  +${LX} remap units box
+#fix 1 all deform 1 xy final ${LX} remap x units box
+
+
+#change_box all triclinic remap
+change_box all xy delta ${LX} set remap units box
+
+print "PRINTING XLOW ${xl} , ${xh}, ${LX}"
+
+write_data tilted.txt
+dump             0 all    custom 1 dump.1 id type x y z fx fy fz
