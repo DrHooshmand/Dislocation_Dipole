@@ -1,4 +1,4 @@
-#Straining
+#Tilting the Cell
 
 units                  metal
 atom_style              atomic
